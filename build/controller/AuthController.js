@@ -18,10 +18,38 @@ const Users_1 = __importDefault(require("../models/Users"));
 const HandleResponse_1 = require("../HandleResponse");
 const key = process.env.SECRET_KEY || "secret";
 class AuthController {
-    static Login(req, res) {
+    static LoginWithNumber(req, res) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const { phone_number, password } = req.body;
+            yield Users_1.default.findOne({ phone_number }).then((user) => {
+                if (user) {
+                    if (bcryptjs_1.default.compareSync(password, user.password)) {
+                        const payload = {
+                            userId: user._id,
+                            email: user.email,
+                            full_name: user.full_name,
+                        };
+                        let token = jsonwebtoken_1.default.sign(payload, key);
+                        (0, HandleResponse_1.HandleResponse)(res, 200, `Login Successful`, "success", token);
+                        // res.json(token);
+                    }
+                    else {
+                        (0, HandleResponse_1.HandleResponse)(res, 200, `Passwords do not match`, "error", {});
+                        // res.json({ error: "Passwords do not match" });
+                    }
+                }
+                else {
+                    (0, HandleResponse_1.HandleResponse)(res, 200, `No user with that phone number`, "error", {});
+                    // res.json({
+                    //   error: "User does not exist",
+                    // });
+                }
+            });
+        });
+    }
+    static LoginWithEmail(req, res) {
         return __awaiter(this, void 0, void 0, function* () {
             const { email, password } = req.body;
-            // console.log(req.body);
             yield Users_1.default.findOne({ email }).then((user) => {
                 if (user) {
                     if (bcryptjs_1.default.compareSync(password, user.password)) {
@@ -31,57 +59,60 @@ class AuthController {
                             full_name: user.full_name,
                         };
                         let token = jsonwebtoken_1.default.sign(payload, key);
-                        res.json(token);
+                        (0, HandleResponse_1.HandleResponse)(res, 200, `Login Successful`, "success", token);
+                        // res.json(token);
                     }
                     else {
-                        res.json({ error: "Passwords do not match" });
+                        (0, HandleResponse_1.HandleResponse)(res, 200, `Passwords do not match`, "error", {});
+                        // res.json({ error: "Passwords do not match" });
                     }
                 }
                 else {
-                    res.json({
-                        error: "User does not exist",
-                    });
+                    (0, HandleResponse_1.HandleResponse)(res, 200, `No user with that email address`, "error", {});
                 }
             });
         });
     }
-    static UpdateAccount(req, res) {
+    // static async UpdateAccount(req, res) {
+    //   const { matric } = req.params;
+    //   const {password} = req.body
+    //   bcrypt.hash(password, 10, (err, hash) => {
+    //           Users.findOneAndUpdate({matric}, {
+    //             $set: {password: hash}
+    //         }, {
+    //             new: true,
+    //             runValidators: true,
+    //             upsert: true,
+    //             returnOriginal: false,
+    //             returnNewDocument: true
+    //         }).exec()
+    //         .then((user)=>{
+    //           HandleResponse(res, 201, "Account Updated Successfully", user)
+    //         })
+    //         })
+    // }
+    static CreateAccount(req, res) {
         return __awaiter(this, void 0, void 0, function* () {
-            const { matric } = req.params;
-            const { password } = req.body;
-            bcryptjs_1.default.hash(password, 10, (err, hash) => {
-                Users_1.default.findOneAndUpdate({ matric }, {
-                    $set: { password: hash }
-                }, {
-                    new: true,
-                    runValidators: true,
-                    upsert: true,
-                    returnOriginal: false,
-                    returnNewDocument: true
-                }).exec()
-                    .then((user) => {
-                    (0, HandleResponse_1.HandleResponse)(res, 201, "Account Updated Successfully", user);
-                });
-            });
-        });
-    }
-    static CreateUser(req, res) {
-        return __awaiter(this, void 0, void 0, function* () {
-            const { email, full_name, } = req.body;
+            const { email, phone_number, password, referral_code } = req.body;
             const NewUser = {
                 email,
-                full_name,
+                phone_number,
+                password,
+                referral_code,
             };
             yield Users_1.default.findOne({ email })
                 .then((user) => {
                 if (user) {
                     console.log(user);
-                    (0, HandleResponse_1.HandleResponse)(res, 500, `${full_name} exists already`, user);
+                    (0, HandleResponse_1.HandleResponse)(res, 200, `${email} exists already`, "error", user);
                 }
                 if (!user) {
                     // console.log(users)
-                    Users_1.default.create(NewUser).then(() => {
-                        (0, HandleResponse_1.HandleResponse)(res, 200, `${full_name} added to the user list successfully`, NewUser);
+                    bcryptjs_1.default.hash(password, 10, (err, hash) => {
+                        NewUser.password = hash;
+                        Users_1.default.create(NewUser).then(() => {
+                            (0, HandleResponse_1.HandleResponse)(res, 200, `${email} added to the user list successfully`, "success", NewUser);
+                        });
                     });
                 }
             })

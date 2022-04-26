@@ -1,10 +1,14 @@
 const mongoose = require('mongoose');
 
 const UsersSchema = new mongoose.Schema({
-    full_name: String,
+    phone_number: String,
     email: String,
     password: String,
-    image: String,
+    referral_code: String,
+    activate_referral_code: {
+        type: Boolean,
+        default: false
+    },
     modified: {
         type: Date,
         default: Date.now

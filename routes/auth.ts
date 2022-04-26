@@ -7,8 +7,8 @@ import AuthController from '../controller/AuthController';
 router.use(cors())
 
 router.get("/", (req, res)=> AuthController.GetUsers(req, res))
-router.post("/login", (req, res)=> AuthController.Login(req, res))
-router.post("/update_account/:matric", (req, res)=> AuthController.UpdateAccount(req, res))
-router.post("/create_user", (req, res)=> AuthController.CreateUser(req, res))
+router.post("/login/phone_number", (req, res)=> AuthController.LoginWithNumber(req, res))
+router.post("/login/email", (req, res)=> AuthController.LoginWithEmail(req, res))
+router.post("/register", (req, res)=> AuthController.CreateAccount(req, res))
 
 module.exports = router

@@ -2,8 +2,11 @@ export const HandleResponse = (
     res,
     status,
     msg,
-    data
+    type,
+    data,
 ) => res.status(status).json({
-    message: msg,
+    message: {
+        type, msg
+    },
     data
 })
