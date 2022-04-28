@@ -132,5 +132,15 @@ class AuthController {
             });
         });
     }
+    static GetUser(req, res) {
+        return __awaiter(this, void 0, void 0, function* () {
+            var decode = jsonwebtoken_1.default.verify(req.headers['authorization'], key);
+            // res.json({user: decode})
+            yield Users_1.default.findById({ _id: decode === null || decode === void 0 ? void 0 : decode.userId }).then(user => {
+                user && (0, HandleResponse_1.HandleResponse)(res, 200, `Data retrieved successfully`, "success", user);
+                !user && (0, HandleResponse_1.HandleResponse)(res, 200, `Can't retrieve user`, "error", {});
+            });
+        });
+    }
 }
 exports.default = AuthController;
