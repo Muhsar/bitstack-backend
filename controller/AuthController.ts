@@ -113,5 +113,13 @@ class AuthController {
       !users && res.json({message: "Unexpected Error"})
     })
   }
+  static async GetUser(req, res) {
+    var decode = jwt.verify(req.headers['authorization'], key)
+    // res.json({user: decode})
+    await Users.findById({_id: decode?.userId}).then(user=>{
+      user &&  HandleResponse(res, 200, `Data retrieved successfully`, "success", user)
+      !user &&  HandleResponse(res, 200, `Can't retrieve user`, "error", {})
+    })
+  }
 }
 export default AuthController;
